@@ -1,4 +1,4 @@
-#from PIL import Image
+
 import math
 import pygame
 from pygame.locals import *
@@ -21,7 +21,7 @@ edges = (  # edges of main pyramid
 
     (1, 2),
     (1, 3),
-    (2, 3),
+    (2, 3)
 )
 
 colors = (
@@ -56,14 +56,12 @@ def calculate_normal(vertices, surface):
     v1 = (p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2])
     v2 = (p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2])
 
-    # Oblicz iloczyn wektorowy
     normal = (
         v1[1] * v2[2] - v1[2] * v2[1],
         v1[2] * v2[0] - v1[0] * v2[2],
         v1[0] * v2[1] - v1[1] * v2[0]
     )
 
-    # Znormalizuj wektor normalny
     length = (normal[0]**2 + normal[1]**2 + normal[2]**2)**0.5
     normal = (normal[0] / length, normal[1] / length, normal[2] / length)
 
@@ -93,19 +91,6 @@ def sub_tetrahedrons(vertices):  # function which returns vertices of 4 smaller 
     ]
 
 
-# def load_texture():  # unused as of now
-#     texture = glGenTextures(1)
-#     glBindTexture(GL_TEXTURE_2D, texture)
-#
-#     image = Image.open("image.jpg")
-#     image_data = image.tobytes("raw", "RGBX", 0, -1)
-#
-#     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data)
-#     glGenerateMipmap(GL_TEXTURE_2D)
-#
-#     return texture
-
-
 def tetrahedron(vertices, check):  # function drawing a tetrahedron
     glBegin(GL_LINES)
     for edge in edges:
@@ -120,7 +105,6 @@ def tetrahedron(vertices, check):  # function drawing a tetrahedron
             normal = calculate_normal(vertices, surface)
             glNormal3fv(normal)
             for i, vertex in enumerate(surface):
-                #  glColor3fv(colors[i])
                 glColor3f(colors[i][0], colors[i][1], colors[i][2])
                 glVertex3fv(vertices[vertex])
         glEnd()
@@ -167,30 +151,18 @@ def light_sphere(x, y, z, color):
 
 
 def set_light_properties(color):
-    # Materiał źródła światła
-    glMaterialfv(GL_FRONT, GL_AMBIENT, color)  # Kolor światła rozproszonego
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, color)  # Kolor światła rozproszonego
-    glMaterialfv(GL_FRONT, GL_SPECULAR, color)  # Kolor światła odbitego
-    glMaterialfv(GL_FRONT, GL_SHININESS, [0.1])  # Współczynnik połysku
-
-
-
-def calculate_light_intensity(x, y):
-    # Symulacja zmiany intensywności światła w zależności od położenia źródła
-    distance = math.sqrt(x**2 + y**2)
-    max_distance = 2.0  # Maksymalna odległość, dla której światło jest pełne
-    intensity = max(0, 1 - distance / max_distance)
-    return intensity
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, color)
+    glMaterialfv(GL_FRONT, GL_SPECULAR, color)
+    glMaterialfv(GL_FRONT, GL_SHININESS, [0.1])
 
 
 def main():
     # directional light variables
-    light_direction_position = [1, 1, 1]
+    light_direction_position = [1, 1, 1, 0.0]
     rotation_status = True
     rotation_pyramid = 0
     rotation_speed_pyramid = 0.5
     rotation_light = True
-    rotation_speed_light = 3
     texture_status = 1
     light_color = [1.0, 1.0, 1.0, 1.0]
     radius = 0
@@ -217,12 +189,12 @@ def main():
 
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)
-    glEnable(GL_LIGHT1)
+    #glEnable(GL_LIGHT1)
     glEnable(GL_COLOR_MATERIAL)
     glEnable(GL_BLEND)
 
     # point light
-    #glLightfv(GL_LIGHT0, GL_SPOT_CUTOFF, 85.0)
+    # glLightfv(GL_LIGHT0, GL_SPOT_CUTOFF, 85.0)
     glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.2)
     glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1)
     glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01)
@@ -264,17 +236,15 @@ def main():
                     else:
                         texture_status = 0
 
-                # if event.key == pygame.K_1:
-                #     gluLookAt(0, 2, 0, 0, 0, 0, 0, 0, -1)
-                # if event.key == pygame.K_2:
-                #     gluLookAt(0, -1, -5, 0, 0, 0, 0, 1, 0)
-
                 # choose type of light
                 if event.key == pygame.K_l:
                     if light_type == 0:
                         light_type = 1
-                        light_color = [1.0, 1.0, 1.0, 1.0]
+                        glDisable(GL_LIGHT0)
+                        glEnable(GL_LIGHT1)
                     else:
+                        glDisable(GL_LIGHT1)
+                        glEnable(GL_LIGHT0)
                         light_type = 0
 
                 # directional light color
@@ -289,17 +259,17 @@ def main():
 
                 # directional light position
                 if event.key == pygame.K_a:
-                    light_direction_position[0] = light_direction_position[0] - 0.2
+                    light_direction_position[0] -= 0.2
                 if event.key == pygame.K_d:
-                    light_direction_position[0] = light_direction_position[0] + 0.2
+                    light_direction_position[0] += 0.2
                 if event.key == pygame.K_w:
-                    light_direction_position[1] = light_direction_position[1] + 0.2
+                    light_direction_position[1] += 0.2
                 if event.key == pygame.K_s:
-                    light_direction_position[1] = light_direction_position[1] - 0.2
+                    light_direction_position[1] -= 0.2
                 if event.key == pygame.K_q:
-                    light_direction_position[2] = light_direction_position[2] + 0.2
+                    light_direction_position[2] += 0.2
                 if event.key == pygame.K_e:
-                    light_direction_position[2] = light_direction_position[2] - 0.2
+                    light_direction_position[2] -= 0.2
 
                 # camera movement
                 if event.key == pygame.K_UP:
@@ -315,39 +285,37 @@ def main():
 
         # control rotation
         rotation_pyramid += rotation_speed_pyramid if rotation_status else 0
-        rotation_light += rotation_speed_light if rotation_status else 0
 
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, (0.8, 0.8, 0.8, 1.0))
         glPushMatrix()
+        glMaterialfv(GL_FRONT, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
+        glMaterialfv(GL_FRONT, GL_SHININESS, 50.0)
         # Draw and rotate pyramid
         glRotatef(rotation_pyramid, 0, 1, 0)
         sierpinski(beginningVertices, levels, texture_status)
         glPopMatrix()
 
         # Draw ground
+        glDisable(GL_LIGHTING)
         glPushMatrix()
         ground()
         glPopMatrix()
+        glEnable(GL_LIGHTING)
 
         # Draw and rotate light source
         if light_type == 0:
             glPushMatrix()
-            glDisable(GL_LIGHT1)
-            glEnable(GL_LIGHT0)
             if rotation_light:
                 radius = radius + 0.01
             light_x, light_y = light_position(radius)
             light_sphere(light_x, 0.75, light_y, (1.0, 1.0, 1.0))
-            glLightfv(GL_LIGHT0, GL_POSITION, [light_x, 0.75, light_y, 1.0])
+            glLightfv(GL_LIGHT0, GL_POSITION, [light_x, 0.75, light_y, 0.5])
             glPopMatrix()
         # Directional light
         else:
             glPushMatrix()
-            glDisable(GL_LIGHT0)
-            glEnable(GL_LIGHT1)
             directional_light(light_color, light_direction_position)
             light_sphere(light_direction_position[0], light_direction_position[1], light_direction_position[2], light_color)
-            glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, [light_direction_position[0], light_direction_position[1], light_direction_position[2], 0.0])
+            glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light_direction_position)
 
             glPopMatrix()
         set_light_properties(light_color)
