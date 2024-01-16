@@ -40,11 +40,7 @@ surfaces = (  # walls of main pyramid
     (1, 2, 3)
 )
 
-ground_vertices = ( # ground vertices on which pyramid stands on
-    # (300, 0, 300),
-    # (300, 0, -300),
-    # (-300, 0, -300),
-    # (-300, 0, 300)
+ground_vertices = ( # ground vertices on which pyramid stands on - was used with ground()
     (150, 0, 150),
     (150, 0, -150),
     (-150, 0, -150),
@@ -72,7 +68,7 @@ def calculate_normal(vertices, surface):
     return normal
 
 
-def load_ground():
+def load_ground(): # load ground with texture
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, glGenTextures(1))
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
@@ -103,7 +99,7 @@ def load_ground():
     glDisable(GL_TEXTURE_2D)
 
 
-def ground():
+def ground(): # old ground method, not used anymore
     glBegin(GL_QUADS)
     for vertex in ground_vertices:
         glColor3fv((0, 0.4, 0))
@@ -154,7 +150,7 @@ def sierpinski(vertices, depth, texture_status):  # recursively drawing sierpins
         sierpinski(tetra, depth - 1, texture_status)
 
 
-def directional_light(light_color, light_direction_position):  # funckja odpowiadajaca za oswietlenie
+def directional_light(light_color, light_direction_position):  # method for directional light
     glLightfv(GL_LIGHT1, GL_POSITION, light_direction_position)
     glLightfv(GL_LIGHT1, GL_DIFFUSE, light_color)
     glLight(GL_LIGHT1, GL_POSITION, light_color)
