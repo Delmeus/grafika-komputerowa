@@ -299,9 +299,6 @@ def main():
                 if event.key == pygame.K_e:
                     light_direction_position[2] -= 0.2
 
-                if event.key == pygame.K_1:
-                    gluLookAt(0, 2, 0, 0, 0, 0, 0, 0, -1)
-
                 # camera movement
                 if event.key == pygame.K_UP:
                     glTranslatef(0, -1, 0)
