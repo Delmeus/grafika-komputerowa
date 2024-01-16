@@ -41,10 +41,14 @@ surfaces = (  # walls of main pyramid
 )
 
 ground_vertices = ( # ground vertices on which pyramid stands on
-    (300, 0, 300),
-    (300, 0, -300),
-    (-300, 0, -300),
-    (-300, 0, 300)
+    # (300, 0, 300),
+    # (300, 0, -300),
+    # (-300, 0, -300),
+    # (-300, 0, 300)
+    (150, 0, 150),
+    (150, 0, -150),
+    (-150, 0, -150),
+    (-150, 0, 150)
 )
 
 
@@ -66,6 +70,37 @@ def calculate_normal(vertices, surface):
     normal = (normal[0] / length, normal[1] / length, normal[2] / length)
 
     return normal
+
+
+def load_ground():
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, glGenTextures(1))
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
+    texture_surface = pygame.image.load("sand.jpg")
+    texture_data = pygame.image.tostring(texture_surface, "RGBA", True)
+
+    width, height = texture_surface.get_width(), texture_surface.get_height()
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data)
+    step_size = 10
+    for x in range(-30, 30, step_size):
+        for z in range(-30, 30, step_size):
+            glBegin(GL_QUADS)
+            glTexCoord2f(0, 0)
+            glVertex3fv((x, 0, z))
+
+            glTexCoord2f(1, 0)
+            glVertex3fv((x + step_size, 0, z))
+
+            glTexCoord2f(1, 1)
+            glVertex3fv((x + step_size, 0, z + step_size))
+
+            glTexCoord2f(0, 1)
+            glVertex3fv((x, 0, z + step_size))
+            glEnd()
+
+    glDisable(GL_TEXTURE_2D)
 
 
 def ground():
@@ -189,17 +224,14 @@ def main():
 
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)
-    #glEnable(GL_LIGHT1)
     glEnable(GL_COLOR_MATERIAL)
     glEnable(GL_BLEND)
 
     # point light
-    # glLightfv(GL_LIGHT0, GL_SPOT_CUTOFF, 85.0)
     glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.2)
     glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1)
     glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01)
     # directional light
-    # glLightfv(GL_LIGHT1, GL_SPOT_CUTOFF, 45.0)
     glLightfv(GL_LIGHT1, GL_SPOT_CUTOFF, 75.0)
     glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.2)
     glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.01)
@@ -271,6 +303,9 @@ def main():
                 if event.key == pygame.K_e:
                     light_direction_position[2] -= 0.2
 
+                if event.key == pygame.K_1:
+                    gluLookAt(0, 2, 0, 0, 0, 0, 0, 0, -1)
+
                 # camera movement
                 if event.key == pygame.K_UP:
                     glTranslatef(0, -1, 0)
@@ -295,11 +330,12 @@ def main():
         glPopMatrix()
 
         # Draw ground
-        glDisable(GL_LIGHTING)
         glPushMatrix()
-        ground()
+        glColor4f(1.0, 1.0, 1.0, 1.0)
+        glMaterialfv(GL_FRONT, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
+        glMaterialfv(GL_FRONT, GL_SHININESS, 50.0)
+        load_ground()
         glPopMatrix()
-        glEnable(GL_LIGHTING)
 
         # Draw and rotate light source
         if light_type == 0:
@@ -308,7 +344,7 @@ def main():
                 radius = radius + 0.01
             light_x, light_y = light_position(radius)
             light_sphere(light_x, 0.75, light_y, (1.0, 1.0, 1.0))
-            glLightfv(GL_LIGHT0, GL_POSITION, [light_x, 0.75, light_y, 0.5])
+            glLightfv(GL_LIGHT0, GL_POSITION, [light_x, 0.75, light_y, 1])
             glPopMatrix()
         # Directional light
         else:
