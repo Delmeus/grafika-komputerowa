@@ -301,13 +301,13 @@ def main():
 
                 # camera movement
                 if event.key == pygame.K_UP:
-                    glTranslatef(0, -1, 0)
+                    glTranslatef(0, -0.5, 0)
                 if event.key == pygame.K_DOWN:
-                    glTranslatef(0, 1, 0)
+                    glTranslatef(0, 0.5, 0)
                 if event.key == pygame.K_LEFT:
-                    glTranslatef(1, 0, 0)
+                    glTranslatef(0.5, 0, 0)
                 if event.key == pygame.K_RIGHT:
-                    glTranslatef(-1, 0, 0)
+                    glTranslatef(-0.5, 0, 0)
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
